@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name: PALASTHOTEL Aggregator
+ * Plugin Name: Aggregator
  * Description: Aggregates js files.
  * Version: 1.0
  * Author: PALASTHOTEL by Edward Bock
