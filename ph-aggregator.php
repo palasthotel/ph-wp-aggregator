@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Aggregator
  * Description: Aggregates js files.
- * Version: 1.0.2
+ * Version: 1.0.8
  * Author: PALASTHOTEL by Edward Bock
  * Author URI: http://www.palasthotel.de
  */
@@ -30,8 +30,9 @@ add_action('wp_print_scripts', 'ph_aggregator_js',9999);
 function ph_aggregator_js() {
 	/**
 	 * no compression when is admin areas are displayed
+	 * or if on login page
 	 */
-	if(is_admin()) return;
+	if(is_admin() || in_array($GLOBALS['pagenow'], array('wp-login.php', 'wp-register.php')) ) return;
 
 	/**
 	 * get options
@@ -47,7 +48,13 @@ function ph_aggregator_js() {
 	 * write js files
 	 */
 	if( $options['rewrite'] ){
-		ph_aggregator_rewrite($js_contents);
+		$success = ph_aggregator_rewrite($js_contents);
+		/**
+		 * save changes to options if no success with writing
+		 */
+		if(!$success){
+			$options["rewrite"] = false;
+		}
 	}
 
 	/**
@@ -78,8 +85,8 @@ function ph_aggregator_paths($place = null){
 		$logged_in = 'logged-in-';
 	}
 	$paths = (object) array(
-		'dir' => rtrim(plugin_dir_path( __FILE__ ), "/")."/aggregated",
-		'url' => rtrim(plugins_url( '', __FILE__ ), "/")."/aggregated",
+		'dir' => rtrim(get_stylesheet_directory(), "/")."/aggregated",
+		'url' => rtrim(get_stylesheet_directory_uri(), "/")."/aggregated",
 		'file_pattern' => $logged_in.'%place%.js',
 		'file' => '',
 	);
@@ -95,6 +102,9 @@ function ph_aggregator_script(&$options){
 	$js_contents = array();
 	$js_files = array();
 	$ignores = ph_aggregator_get_ignores();
+
+	$blog_info_url = get_bloginfo('url');
+	$protocoll_relative = str_replace(array("http://", "https://"), "//", $blog_info_url);
 
 	if ( !is_a($wp_scripts, "WP_Scripts") ) return;
 	if (is_array($wp_scripts->queue)) {
@@ -121,27 +131,43 @@ function ph_aggregator_script(&$options){
 		foreach ($wp_scripts->to_do as $js) {
 			if(in_array($js, $ignores)) continue;
 			$js_src=$wp_scripts->registered[$js]->src;
-			$js_place=$wp_scripts->registered[$js]->extra;
-			if (is_array($js_place) && isset($js_place["group"]) && $js_place['group']==1) {
-				$js_place='footer';
+			$js_extra =$wp_scripts->registered[$js]->extra;
+			$js_place = 'header';
+			$js_data = '';
+			if (is_array($js_extra)) {
+				/**
+				 * is footer script
+				 */
+				if( isset($js_extra["group"]) && $js_extra['group']==1 ){
+					$js_place='footer';
+				}
+				/**
+				 * has extra data
+				 */
+				if( isset($js_extra["data"]) && is_string($js_extra['data']) ){
+					$js_data=$js_extra["data"];
+				}
 			}
-			else {
-				$js_place='header';
-			}
+			
 			if (
-				(!(strpos($js_src,get_bloginfo('url'))===false)
+				( !(strpos($js_src,$blog_info_url)===false)
+					|| !(strpos($js_src,$protocoll_relative) === false)
 					|| substr($js_src,0,1)==="/"
 					|| substr($js_src,0,1)===".")
 
-				&& (substr($js_src,strrpos($js_src,"."),3)==".js") ) {
+				&& (substr($js_src,-3)==".js") ) {
 				/**
 				 * is a locally loaded js file
 				 */
-				if (strpos($js_src,get_bloginfo('url'))===false) {
-					$js_relative_url=substr($js_src,1);
+				if (strpos($js_src,$blog_info_url)===0) {
+					$js_relative_url=substr($js_src,strlen($blog_info_url)+1);
+					
+				} 
+				else if(strpos($js_src,$protocoll_relative)===0){
+					$js_relative_url=substr($js_src,strlen($protocoll_relative)+1);
 				}
 				else {
-					$js_relative_url=substr($js_src,strlen(get_bloginfo('url'))+1);
+					$js_relative_url=substr($js_src,1);
 				}
 				if (strpos($js_relative_url,"?")){
 					$js_relative_url=substr($js_relative_url,0,strpos($js_relative_url,"?"));
@@ -161,6 +187,7 @@ function ph_aggregator_script(&$options){
 					$js_time=filemtime($js_relative_url);
 				}
 				if ($js_time != null) {
+
 					if(!isset($scripts[$js]) || !is_array($scripts[$js]) ){
 						$scripts[$js] = array();
 					}
@@ -180,7 +207,7 @@ function ph_aggregator_script(&$options){
 					if( !isset($js_files[$js_place]) || !is_array($js_files[$js_place]) ){
 						$js_files[$js_place] = array();
 					}
-					$js_files[$js_place][] = $js_relative_url;
+					$js_files[$js_place][] = (object)array("path"=>$js_relative_url, "extra_data"=>$js_data);
 				}
 			}
 		}
@@ -228,20 +255,24 @@ function ph_aggregator_dequeue(&$options){
 		return;
 	}
 	$wp_scripts->all_deps($wp_scripts->queue);
-	foreach ($wp_scripts->to_do as $handle) {
+	for($i = 0; $i < count($wp_scripts->to_do); $i++ ){
+		$handle = $wp_scripts->to_do[$i];
 		if(isset($options['js'][$handle])){
 			$wp_scripts->remove($handle);
 			unset($wp_scripts->registered[$handle]);
-			array_shift($wp_scripts->to_do);
+			array_splice($wp_scripts->to_do, $i,1);
+			$i--;
 		}
 	}
 }
-function ph_aggregator_get_content($js_relative_url){
+function ph_aggregator_get_content($js){
 	$js_content="";
-	if(!is_writable(dirname(__FILE__))) return "";
+	$js_relative_url = $js->path;
 	$source_file=fopen($js_relative_url,'r');
 	if($source_file){
-		$js_content.= "/**\n * Aggregated\n * ". $js_relative_url." content:\n */\n";
+		$js_content.= "/**\n * Aggregated\n * ". $js_relative_url." extra data:\n */\n";
+		$js_content.= $js->extra_data;
+		$js_content.= "/**\n content:\n */\n";
 		$js_content.= fread($source_file,filesize($js_relative_url))."\n";
 		fclose($source_file);
 		/**
@@ -255,18 +286,24 @@ function ph_aggregator_get_content($js_relative_url){
  * rewrites the aggregated scripts
  */
 function ph_aggregator_rewrite($js_contents){
-	if(!is_writable(dirname(__FILE__))) return;
 	foreach ($js_contents as $place => $content) {
 		$paths = ph_aggregator_paths($place);
+		if(!is_dir($paths->dir)){
+			$success = mkdir($paths->dir);
+			if(!$success) return false;
+			chmod($paths->dir, 0777);
+		}
+		if(!is_writable($paths->dir)) return false;
 		$the_file = rtrim($paths->dir,"/")."/".$paths->file;
 		$aggregated_file=fopen($the_file, 'w');
 		fwrite($aggregated_file, $content);
 		fclose($aggregated_file);
 		
-		// chmod($the_file, 0666);
+		chmod($the_file, 0777);
 		
 		ph_aggregator_purge($paths->url."/".$paths->file);
 	}
+	return true;
 }
 
 function ph_aggregator_purge($file_url){
