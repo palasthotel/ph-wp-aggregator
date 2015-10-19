@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Aggregator
  * Description: Aggregates js files.
- * Version: 1.1.1
+ * Version: 1.1.2
  * Author: PALASTHOTEL by Edward Bock
  * Author URI: http://www.palasthotel.de
  */
@@ -117,9 +117,11 @@ class Aggregator
 		 */
 		if(get_option( 'aggregator_file_location', 'uploads' ) == 'uploads'){
 			$uploads = wp_upload_dir();
-			$theme = wp_get_theme();
-			$paths->dir = rtrim($uploads["basedir"], "/")."/aggregated_".$theme->get_template();
-			$paths->url = rtrim($uploads["baseurl"], "/")."/aggregated_".$theme->get_template();
+			$style_dir = get_stylesheet_directory();
+			$parts= explode("/",$style_dir);
+			$template = end($parts);
+			$paths->dir = rtrim($uploads["basedir"], "/")."/aggregated_".$template;
+			$paths->url = rtrim($uploads["baseurl"], "/")."/aggregated_".$template;
 		}
 
 		if($place != null){
