@@ -3,8 +3,8 @@ Contributors: edwardbock
 Donate link: http://palasthotel.de/
 Tags: aggregator, seo, javascript
 Requires at least: 4.0
-Tested up to: 4.2.2
-Stable tag: 1.0.8
+Tested up to: 4.3.1
+Stable tag: 1.1
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl
 
@@ -23,11 +23,14 @@ It's best practise to have only a very few page requests. This plugin aggregates
 == Frequently Asked Questions ==
 
 
-
 == Screenshots ==
 
 
 == Changelog ==
+
+= 1.1 =
+* aggregated location configuratable
+* object orientation implemented
 
 = 1.0.8 =
 * localization data for aggregated scripts fix
