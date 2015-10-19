@@ -28,6 +28,10 @@ It's best practise to have only a very few page requests. This plugin aggregates
 
 == Changelog ==
 
+= 1.1.1 =
+* default to uploads
+* theme slug for aggregated scripts
+
 = 1.1 =
 * aggregated location configuratable
 * object orientation implemented
