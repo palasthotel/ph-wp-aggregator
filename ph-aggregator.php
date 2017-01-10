@@ -63,14 +63,14 @@ class Aggregator
 		/**
 		 * write js files
 		 */
+		$rewritten = false;
 		if( $options['rewrite'] ){
-			$success = $this->rewrite($js_contents);
+			$rewritten = $this->rewrite($js_contents);
+			
 			/**
 			 * save changes to options if no success with writing
 			 */
-			if(!$success){
-				$options["rewrite"] = false;
-			}
+			$options["rewrite"] = !$rewritten;
 		}
 
 		/**
@@ -86,7 +86,7 @@ class Aggregator
 		/**
 		 * set rewrite false and save options if was rewritten
 		 */
-		if($options["rewrite"]){
+		if($rewritten){
 			$options["rewrite"] = false;
 			$this->options($options);
 		}
