@@ -3,7 +3,7 @@
  * Plugin Name: Aggregator
  * Description: Aggregates js files.
  * Version: 1.1.4
- * Author: PALASTHOTEL by Edward Bock
+ * Author: Palasthotel <rezeption@palasthotel.de> (Edward Bock)
  * Author URI: https://palasthotel.de
  */
 
