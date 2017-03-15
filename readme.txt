@@ -28,6 +28,9 @@ It's best practise to have only a very few page requests. This plugin aggregates
 
 == Changelog ==
 
+= 1.1.4 =
+* added try catch blocks around each javascript file to prevent script execution after an error
+
 = 1.1.3 =
 * wp_enqueue with aggregated files time as version
 
