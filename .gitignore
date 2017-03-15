@@ -1,1 +1,12 @@
 *.log
+composer.lock
+*.sass-cache*
+.htaccess
+.vagrant
+.idea
+
+# OS Stuff
+.DS_Store
+ehthumbs.db
+Icon
+Thumbs.db
