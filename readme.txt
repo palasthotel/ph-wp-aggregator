@@ -1,10 +1,10 @@
 === Aggregator ===
-Contributors: edwardbock
+Contributors: palasthotel, edwardbock
 Donate link: http://palasthotel.de/
 Tags: aggregator, seo, javascript
 Requires at least: 4.0
-Tested up to: 4.7.3
-Stable tag: 1.1.4
+Tested up to: 4.7.4
+Stable tag: 2.0
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl
 
@@ -27,6 +27,9 @@ It's best practise to have only a very few page requests. This plugin aggregates
 
 
 == Changelog ==
+
+= 2.0 =
+* we can handle different aggregations combinations now
 
 = 1.1.4 =
 * added try catch blocks around each javascript file to prevent script execution after an error

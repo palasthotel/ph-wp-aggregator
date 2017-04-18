@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: edward
- * Date: 19.10.15
- * Time: 12:42
- */
 
 namespace Aggregator;
 
@@ -36,8 +30,19 @@ class Settings
 	 * render menu
 	 */
 	function render(){
-		require dirname(__FILE__)."/../partials/settings.php";
-	}
+		?>
+		<div class="wrap">
+			<h2><?php  _e( "Aggregator Settings", Plugin::DOMAIN ); ?></h2>
+			<form method="post" action="options.php">
+				<?php
+				settings_fields( 'aggregator_settings' );
+				do_settings_sections( 'aggregator_settings' );
+				?>
+				<?php submit_button(); ?>
+			</form>
+			</div>
+		<?php
+		}
 
 	/**
 	 * file locations section
@@ -49,6 +54,22 @@ class Settings
 	 * file location field
 	 */
 	function field_file_location(){
-		require dirname(__FILE__)."/../partials/settings-file-location.php";
+
+		$setting = get_option( Plugin::SETTING_FILE_LOCATION, Plugin::OPTION_FILE_LOCATION_UPLOADS );
+		?>
+		<select name="aggregator_file_location">
+			<option
+				value="<?php echo Plugin::OPTION_FILE_LOCATION_UPLOADS; ?>"
+				<?php echo( $setting == Plugin::OPTION_FILE_LOCATION_UPLOADS ? 'selected' : '' ); ?>
+			>Uploads</option>
+
+			<option
+				value="<?php echo Plugin::OPTION_FILE_LOCATION_THEME; ?>"
+				<?php echo( $setting == Plugin::OPTION_FILE_LOCATION_THEME ? 'selected' : '' ); ?>
+			>Theme</option>
+
+		</select>
+		<?php
+
 	}
 }
