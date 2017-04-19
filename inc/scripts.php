@@ -220,10 +220,7 @@ class Scripts {
 						);
 					}
 
-					// TODO: handle src
 					// http://... https://... and //...
-					// or internal with /...
-
 					preg_match( '/(http:|https:)?\/\/(.*)/', $obj->src, $matches );
 					if ( $matches ) {
 						if ( strpos( $matches[2], $blog_domain ) !== false ) {
@@ -232,24 +229,13 @@ class Scripts {
 						$obj->url = $obj->src;
 					}
 
+					// or internal with /...
 					if ( strpos( $obj->src, '/' ) === 0 ) {
 						$obj->file_path = rtrim( ABSPATH, '/' ) . $obj->src;
 					}
 
-
-//					if ( strpos( $obj->src, $blog_info_url ) === 0 ) {
-//						$obj->url = substr( $obj->src, strlen( $blog_info_url ) + 1 );
-//
-//					} else if ( strpos( $obj->src, $protocoll_relative ) === 0 ) {
-//						$obj->url = substr( $obj->src, strlen( $protocoll_relative ) + 1 );
-//					} else {
-//						$obj->url = substr( $obj->src, 1 );
-//					}
-//					if ( strpos( $obj->url, "?" ) ) {
-//						$obj->url = substr( $obj->url, 0, strpos( $obj->url, "?" ) );
-//					}
-//
-//					$obj->file_path = ABSPATH.$obj->url;
+					// if cannot resolve source skip it!
+					if($obj->url == null && $obj->file_path == null) continue;
 
 					if ( is_array( $script->extra ) ) {
 						$extra = $script->extra;

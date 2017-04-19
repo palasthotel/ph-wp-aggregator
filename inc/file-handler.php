@@ -30,7 +30,7 @@ class FileHandler {
 	 */
 	function paths( ) {
 
-		$location = get_option( Plugin::SETTING_FILE_LOCATION, Plugin::OPTION_FILE_LOCATION_UPLOADS );
+		$location = get_option( Plugin::OPTION_FILE_LOCATION, Plugin::OPTION_FILE_LOCATION_UPLOADS );
 
 		if ( $location == Plugin::OPTION_FILE_LOCATION_THEME ) {
 			return (object) array(

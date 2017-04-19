@@ -19,9 +19,11 @@ class Plugin {
 
 	const DOMAIN = "aggregator";
 
-	const SETTING_FILE_LOCATION = "aggregator_file_location";
+	const OPTION_FILE_LOCATION = "aggregator_file_location";
 	const OPTION_FILE_LOCATION_UPLOADS = "uploads";
 	const OPTION_FILE_LOCATION_THEME = "theme";
+
+	const OPTION_MINIFY = "aggregator_minify";
 
 	const FILTER_IGNORE_FILE = "aggregator_ignpre";
 	/**
