@@ -25,13 +25,6 @@ class Settings {
 	 */
 	function admin_init() {
 
-//		add_settings_section(
-//			self::SECTION_STATS,
-//			__( 'Statistics', Plugin::DOMAIN ),
-//			array( $this, 'section_stats' ),
-//			self::MENU_SLUG
-//		);
-
 		add_settings_section(
 			self::MENU_SLUG,
 			__( 'Stats', Plugin::DOMAIN ),

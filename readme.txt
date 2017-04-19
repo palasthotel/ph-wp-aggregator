@@ -29,7 +29,8 @@ It's best practise to have only a very few page requests. This plugin aggregates
 == Changelog ==
 
 = 2.0 =
-* we can handle different aggregations combinations now
+* we can handle different aggregation combinations now
+* scripts need to be rerendered
 
 = 1.1.4 =
 * added try catch blocks around each javascript file to prevent script execution after an error
