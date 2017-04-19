@@ -71,13 +71,6 @@ class Scripts {
 	 */
 	function scripts() {
 
-		// TODO: build hash from file names + file dates
-		// TODO: check if hash js file exists
-		// TODO: if not aggregate
-		// TODO: dequeue all aggregated
-		// TODO: enqueue aggregated
-
-
 		$header          = $this->get_header_scripts();
 		$header_filename = $this->get_js_filename( $header );
 
@@ -104,10 +97,6 @@ class Scripts {
 		$this->dequeue($header);
 		$this->dequeue($footer);
 
-		// TODO: write extra_datas inline because they can be calculated
-		// TODO: extra data to header before enqueued scripts
-		// TODO: extra data to footer before enqueue scripts
-
 		/*
 		 * enqueue aggregated files
 		 */
@@ -125,44 +114,6 @@ class Scripts {
 			1,
 			true
 		);
-
-
-		return;
-		/**
-		 * update options
-		 */
-		$js_contents = $this->script( $options );
-
-		/**
-		 * write js files
-		 */
-		if ( $options['rewrite'] ) {
-			$success = $this->rewrite( $js_contents );
-			/**
-			 * save changes to options if no success with writing
-			 */
-			if ( ! $success ) {
-				$options["rewrite"] = false;
-			}
-		}
-
-		/**
-		 * enqueues new scripts
-		 */
-		$this->enqueue( $options );
-
-		/**
-		 * dequeue aggregated scripts
-		 */
-		$this->dequeue( $options );
-
-		/**
-		 * set rewrite false and save options if was rewritten
-		 */
-		if ( $options["rewrite"] ) {
-			$options["rewrite"] = false;
-			$this->options( $options );
-		}
 	}
 
 	/**
