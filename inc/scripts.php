@@ -23,8 +23,8 @@ class Scripts {
 		$this->_header_scripts = null;
 		$this->_footer_scritps = null;
 
-		add_action('wp_head', array($this, "wp_head"), 1);
-		add_action('wp_footer', array($this, "wp_footer"));
+		add_action( 'wp_head', array( $this, "wp_head" ), 1 );
+		add_action( 'wp_footer', array( $this, "wp_footer" ) );
 
 		add_action( 'wp_enqueue_scripts', array(
 			$this,
@@ -33,22 +33,23 @@ class Scripts {
 
 	}
 
-	function wp_head(){
+	function wp_head() {
 		$header = $this->get_header_scripts();
 		?>
 		<!-- START: Aggregator extra script data from header scripts -->
 		<?php
-		$this->_render_script_data($header);
+		$this->_render_script_data( $header );
 		?>
 		<!-- END: Aggregator extra script data from header scripts -->
 		<?php
 	}
-	function wp_footer(){
+
+	function wp_footer() {
 		$footer = $this->get_footer_scripts();
 		?>
 		<!-- START: Aggregator extra script data from footer scripts -->
 		<?php
-		$this->_render_script_data($footer);?>
+		$this->_render_script_data( $footer ); ?>
 		<!-- END: Aggregator extra script data from header scripts -->
 		<?php
 	}
@@ -56,9 +57,11 @@ class Scripts {
 	/**
 	 * @param $scripts
 	 */
-	private function _render_script_data($scripts){
-		foreach ($scripts as $script){
-			if($script->extra_data == null || $script->extra_data == "") continue;
+	private function _render_script_data( $scripts ) {
+		foreach ( $scripts as $script ) {
+			if ( $script->extra_data == null || $script->extra_data == "" ) {
+				continue;
+			}
 			$extra = $script->extra_data;
 			?>
 			<script type="text/javascript"><?php echo $extra; ?></script>
@@ -76,8 +79,7 @@ class Scripts {
 
 		if ( ! $this->plugin->file_handler->file_exists( $header_filename ) ) {
 			// aggregate new header js
-
-			$this->plugin->file_handler->aggregate_and_write($header_filename, $header);
+			$this->plugin->file_handler->aggregate_and_write( $header_filename, $header );
 
 		}
 
@@ -87,15 +89,15 @@ class Scripts {
 
 		if ( ! $this->plugin->file_handler->file_exists( $footer_filename ) ) {
 			// aggregate new footer js
-			$this->plugin->file_handler->aggregate_and_write($footer_filename, $footer);
+			$this->plugin->file_handler->aggregate_and_write( $footer_filename, $footer );
 
 		}
 
 		/*
 		 * dequeue scripts
 		 */
-		$this->dequeue($header);
-		$this->dequeue($footer);
+		$this->dequeue( $header );
+		$this->dequeue( $footer );
 
 		/*
 		 * enqueue aggregated files
@@ -103,15 +105,15 @@ class Scripts {
 		wp_enqueue_script(
 			Plugin::HANDLE_HEADER,
 			$this->plugin->file_handler->paths()->url . "/{$header_filename}",
-			array(),
-			1,
+			null,
+			filemtime( $this->plugin->file_handler->paths()->dir . "/{$header_filename}" ),
 			false
 		);
 		wp_enqueue_script(
 			Plugin::HANDLE_FOOTER,
 			$this->plugin->file_handler->paths()->url . "/{$footer_filename}",
-			array(),
-			1,
+			null,
+			filemtime( $this->plugin->file_handler->paths()->dir . "/{$footer_filename}" ),
 			true
 		);
 	}
@@ -124,12 +126,14 @@ class Scripts {
 	function get_js_filename( $scripts ) {
 		$ids      = array();
 		$post_fix = "";
+		$prefix = "";
 		foreach ( $scripts as $script ) {
 			$ids[]    = "{$script->handle}-{$script->url}-{$script->changed}";
 			$post_fix = ( $script->footer ) ? "-footer" : "-header";
+			$prefix = ($script->footer)? "f": "h";
 		}
 
-		return sha1( implode( '--', $ids ) ) . "{$post_fix}.js";
+		return $prefix.sha1( implode( '--', $ids ) ) . "{$post_fix}.js";
 	}
 
 	/**
@@ -148,7 +152,10 @@ class Scripts {
 	 * @return array
 	 */
 	function get_footer_scripts() {
-		if($this->_footer_scritps == null) $this->_footer_scritps = $this->_get_scripts( true );
+		if ( $this->_footer_scritps == null ) {
+			$this->_footer_scritps = $this->_get_scripts( true );
+		}
+
 		return $this->_footer_scritps;
 	}
 
@@ -157,7 +164,10 @@ class Scripts {
 	 * @return array
 	 */
 	function get_header_scripts() {
-		if($this->_header_scripts == null) $this->_header_scripts = $this->_get_scripts( false );
+		if ( $this->_header_scripts == null ) {
+			$this->_header_scripts = $this->_get_scripts( false );
+		}
+
 		return $this->_header_scripts;
 	}
 
@@ -176,7 +186,7 @@ class Scripts {
 		if ( is_array( $wp_scripts->queue ) ) {
 
 			$blog_info_url      = get_bloginfo( 'url' );
-			$blog_domain = str_replace(array('https://','http://', '//'),'', $blog_info_url);
+			$blog_domain        = str_replace( array( 'https://', 'http://', '//' ), '', $blog_info_url );
 			$protocoll_relative = str_replace( array(
 				"http://",
 				"https://"
@@ -197,35 +207,34 @@ class Scripts {
 
 					$script = $wp_scripts->registered[ $js ];
 
-					if($script->src)
-
-					$obj = (object) array(
-						'handle'  => $js,
-						'src'     => $script->src,
-						'file_path'    => null,
-						'url'     => null,
-						'footer'  => false,
-						'changed' => '',
-						'extra_data'    => null,
-						'external' => false,
-					);
+					if ( $script->src ) {
+						$obj = (object) array(
+							'handle'     => $js,
+							'src'        => $script->src,
+							'file_path'  => null,
+							'url'        => null,
+							'footer'     => false,
+							'changed'    => '',
+							'extra_data' => null,
+							'external'   => false,
+						);
+					}
 
 					// TODO: handle src
 					// http://... https://... and //...
 					// or internal with /...
 
-					preg_match('/(http:|https:)?\/\/(.*)/', $obj->src, $matches);
-					if($matches){
-						if( strpos($matches[2], $blog_domain) !== false ){
-							$obj->file_path = ABSPATH.str_replace($blog_domain,'',$matches[2]);
+					preg_match( '/(http:|https:)?\/\/(.*)/', $obj->src, $matches );
+					if ( $matches ) {
+						if ( strpos( $matches[2], $blog_domain ) !== false ) {
+							$obj->file_path = ABSPATH . str_replace( $blog_domain, '', $matches[2] );
 						}
 						$obj->url = $obj->src;
 					}
 
-					if(strpos($obj->src,'/') === 0){
-						$obj->file_path = rtrim(ABSPATH, '/').$obj->src;
+					if ( strpos( $obj->src, '/' ) === 0 ) {
+						$obj->file_path = rtrim( ABSPATH, '/' ) . $obj->src;
 					}
-
 
 
 //					if ( strpos( $obj->src, $blog_info_url ) === 0 ) {
@@ -261,8 +270,6 @@ class Scripts {
 					}
 
 
-
-
 					/*
 					 * check file time
 					 */
@@ -270,7 +277,7 @@ class Scripts {
 						$obj->changed = filemtime( $obj->url );
 					}
 
-					$scripts[$js] = $obj;
+					$scripts[ $js ] = $obj;
 				}
 			}
 
