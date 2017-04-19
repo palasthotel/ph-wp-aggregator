@@ -58,6 +58,11 @@ class FileHandler {
 			$content.= $this->get_content($script);
 		}
 
+		if( get_option(Plugin::OPTION_MINIFY, Plugin::OPTION_MINIFY_ON)){
+			require_once $this->plugin->dir."/lib/minifier.php";
+			$content = \JShrink\Minifier::minify($content);
+		}
+
 		$this->write($filename,$content);
 	}
 
@@ -163,7 +168,26 @@ class FileHandler {
 		wp_remote_request( $file_url, array( 'method' => 'PURGE' ) );
 	}
 
+	/**
+	 * get all files in aggregation folder
+	 * @return array
+	 */
+	function get_all_files(){
+		$files = array();
+		$paths = $this->paths();
+		if ( is_dir( $paths->dir ) && $handle = opendir( $paths->dir ) ) {
 
+			while ( false !== ( $entry = readdir( $handle ) ) ) {
+				if ( preg_match( "/.*\.js/", $entry ) ) {
+					$files[] = $entry;
+				}
+
+			}
+
+			closedir( $handle );
+		}
+		return $files;
+	}
 
 
 }

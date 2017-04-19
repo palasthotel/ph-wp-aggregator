@@ -5,8 +5,8 @@ namespace Aggregator;
 class Settings {
 
 	const MENU_SLUG = "aggregator";
-	const SECTION_SETTINGS = "aggregator_settings";
-	const SECTION_STATS = "aggregator_stats";
+
+	const OPTION_CC = "aggregator_clear_cache";
 
 	/**
 	 * Settings constructor.
@@ -39,18 +39,22 @@ class Settings {
 			self::MENU_SLUG
 		);
 
-		add_settings_field( 'aggregator_file_location', __( 'Where to aggregate the files?' ), array(
+		add_settings_field( Plugin::OPTION_FILE_LOCATION, __( 'Where to aggregate the files?' ), array(
 			$this,
 			'field_file_location'
 		), self::MENU_SLUG, self::MENU_SLUG );
-		add_settings_field( 'aggregator_minify', __( 'Minify?', Plugin::DOMAIN ), array(
+		add_settings_field( Plugin::OPTION_MINIFY, __( 'Minify?', Plugin::DOMAIN ), array(
 			$this,
 			'field_minify'
+		), self::MENU_SLUG, self::MENU_SLUG );
+		add_settings_field( self::OPTION_CC, __( 'Clear aggregated files?', Plugin::DOMAIN ), array(
+			$this,
+			'field_clear_cache'
 		), self::MENU_SLUG, self::MENU_SLUG );
 
 		register_setting( self::MENU_SLUG, Plugin::OPTION_FILE_LOCATION );
 		register_setting( self::MENU_SLUG, Plugin::OPTION_MINIFY );
-
+		register_setting( self::MENU_SLUG, self::OPTION_CC, array( $this, 'clear_cache' ) );
 
 
 	}
@@ -68,7 +72,7 @@ class Settings {
 	/**
 	 * render menu
 	 */
-	function render( $args ) {
+	function render() {
 
 		?>
 		<div class="wrap">
@@ -85,6 +89,25 @@ class Settings {
 			</form>
 		</div>
 		<?php
+	}
+
+	/**
+	 * file locations section
+	 */
+	function section_stats() {
+		$paths = $this->plugin->file_handler->paths();
+		echo "In {$paths->url} <br>";
+
+		$files = $this->plugin->file_handler->get_all_files();
+
+		echo "Einträge:<br>";
+		foreach ( $files as $file ) {
+			echo "$file<br>";
+		}
+
+		$files_count = count( $files );
+		echo "{$files_count} aggregierte JavaScript Dateien";
+
 	}
 
 
@@ -116,39 +139,37 @@ class Settings {
 	/**
 	 * minify field
 	 */
-	function field_minify( $args ) {
-
-		$setting = get_option( Plugin::OPTION_MINIFY, 0 );
+	function field_minify() {
+		$setting = get_option( Plugin::OPTION_MINIFY, '' );
 		?>
-		<input type="checkbox" <?php echo ( $setting ) ? "checked" : "" ?> name="<?php echo Plugin::OPTION_MINIFY ?>"
+		<input type="checkbox" <?php echo ( $setting ) ? "checked" : "" ?>
+		       name="<?php echo Plugin::OPTION_MINIFY; ?>"
 		       value="1"/>
 		<?php
 
 	}
 
 	/**
-	 * file locations section
+	 * clear cache
 	 */
-	function section_stats( $args ) {
-		$paths = $this->plugin->file_handler->paths();
-		echo "In {$paths->url} <br>";
+	function field_clear_cache() {
+		?>
+		<input type="checkbox" name="<?php echo self::OPTION_CC; ?>" value="1"/>
+		<?php
 
-		if ( is_dir($paths->dir) && $handle = opendir( $paths->dir ) ) {
-
-			echo "Einträge:<br>";
-
-			$i = 0;
-			while ( false !== ( $entry = readdir( $handle ) ) ) {
-				if ( preg_match( "/.*\.js/", $entry ) ) {
-					$i ++;
-					echo "$entry<br>";
-				}
-
-			}
-
-			echo "{$i} aggregierte JavaScript Dateien";
-
-			closedir( $handle );
-		}
 	}
+
+	function clear_cache( $data ) {
+
+		if ( "1" == $data ) {
+			$files = $this->plugin->file_handler->get_all_files();
+			$dir   = $this->plugin->file_handler->paths()->dir;
+			foreach ( $files as $file ) {
+				unlink( $dir . "/" . $file );
+			}
+		}
+
+		return '';
+	}
+
 }

@@ -24,6 +24,7 @@ class Plugin {
 	const OPTION_FILE_LOCATION_THEME = "theme";
 
 	const OPTION_MINIFY = "aggregator_minify";
+	const OPTION_MINIFY_ON = "1";
 
 	const FILTER_IGNORE_FILE = "aggregator_ignpre";
 	/**
