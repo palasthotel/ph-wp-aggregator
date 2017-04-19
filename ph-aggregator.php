@@ -30,6 +30,12 @@ class Plugin {
 	const FILTER_IGNORED_FILES = "ph_aggregator_ignore";
 
 	/**
+	 * js handles
+	 */
+	const HANDLE_HEADER = "aggregator-header";
+	const HANDLE_FOOTER = "aggregator-footer";
+
+	/**
 	 * register actions and filters
 	 */
 	function __construct() {
@@ -53,6 +59,9 @@ class Plugin {
 
 		require( dirname( __FILE__ ) . "/inc/scripts.php" );
 		$this->scripts = new Scripts($this);
+
+		require dirname(__FILE__). "/inc/test.php";
+		$this->test = new Test($this);
 	}
 
 }

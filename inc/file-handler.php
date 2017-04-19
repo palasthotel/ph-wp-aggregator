@@ -11,30 +11,73 @@ class FileHandler {
 	 * @param Plugin $plugin
 	 */
 	function __construct(Plugin $plugin) {
+		$this->plugin = $plugin;
 	}
 
 	/**
-	 * @param $files array of files
+	 * @param $filename
+	 *
+	 * @return bool
 	 */
-	function getFilename($files){
-		// TODO: return filename as hash of files
+	function file_exists($filename){
+		return (file_exists($this->paths()->dir."/{$filename}"));
 	}
 
 	/**
-	 * get file content
+	 * get paths
 	 *
-	 * @param $js
-	 *
-	 * @return mixed|string
+	 * @return object
 	 */
-	function get_content( $js ) {
+	function paths( ) {
+
+		$location = get_option( Plugin::SETTING_FILE_LOCATION, Plugin::OPTION_FILE_LOCATION_UPLOADS );
+
+		if ( $location == Plugin::OPTION_FILE_LOCATION_THEME ) {
+			return (object) array(
+				'dir'          => rtrim( get_stylesheet_directory(), "/" ) . "/aggregated",
+				'url'          => rtrim( get_stylesheet_directory_uri(), "/" ) . "/aggregated",
+			);
+		}
+
+		$uploads    = wp_upload_dir();
+		return (object) array(
+			'dir'          => rtrim( $uploads["basedir"], "/" ) . "/aggregated",
+			'url'          => rtrim( $uploads["baseurl"], "/" ) . "/aggregated",
+		);
+
+	}
+
+
+	/**
+	 * @param $filename
+	 * @param $scripts
+	 */
+	function aggregate_and_write($filename, $scripts){
+		$content = "";
+		foreach ($scripts as $handle => $script){
+			$content.= $this->get_content($script);
+		}
+
+		$this->write($filename,$content);
+	}
+
+	/**
+	 * get script content
+	 *
+	 * @param $script
+	 *
+	 * @return boolean|string
+	 */
+	function get_content( $script ) {
 		$js_content      = "";
-		$js_relative_url = $js->path;
-		$source_file     = fopen( $js_relative_url, 'r' );
+		$js_relative_url = $script->file_path;
+		$source_file     = fopen(  $js_relative_url, 'r' );
 		if ( $source_file ) {
-			$js_content .= "// AGGREGATOR Aggregated file: " . $js_relative_url . "\n";
-			$js_content .= "// AGGREGATOR Extra data:\n";
-			$js_content .= $this->wrap_in_try_catch( $js->extra_data );
+			$js_content .= "// AGGREGATOR Handle: ".$script->handle;
+			$js_content .= "// AGGREGATOR file: " . $script->url . "\n";
+
+			// extra data comes with wp_head and wp_footer. See Scripts class.
+
 			$js_content .= "// AGGREGATOR Content:\n";
 			$js_content .= $this->wrap_in_try_catch( fread( $source_file, filesize( $js_relative_url ) ) ) . "\n";
 			fclose( $source_file );
@@ -42,52 +85,11 @@ class FileHandler {
 			 * remove source maps
 			 */
 			$js_content = str_replace( "sourceMappingURL", "", $js_content );
+			return $js_content;
 		}
 
-		return $js_content;
+		return false;
 	}
-
-	/**
-	 * get paths
-	 *
-	 * @param null $place
-	 *
-	 * @return object
-	 */
-	function paths( $place = null ) {
-		/**
-		 * separate files for logged in users and logged out users
-		 */
-		$logged_in = '';
-		if ( is_user_logged_in() ) {
-			$logged_in = 'logged-in-';
-		}
-		$paths = (object) array(
-			'dir'          => rtrim( get_stylesheet_directory(), "/" ) . "/aggregated",
-			'url'          => rtrim( get_stylesheet_directory_uri(), "/" ) . "/aggregated",
-			'file_pattern' => $logged_in . '%place%.js',
-			'file'         => '',
-		);
-
-		/**
-		 * if uploads is selected in options
-		 */
-		if ( get_option( 'aggregator_file_location', 'uploads' ) == 'uploads' ) {
-			$uploads    = wp_upload_dir();
-			$style_dir  = get_stylesheet_directory();
-			$parts      = explode( "/", $style_dir );
-			$template   = end( $parts );
-			$paths->dir = rtrim( $uploads["basedir"], "/" ) . "/aggregated_" . $template;
-			$paths->url = rtrim( $uploads["baseurl"], "/" ) . "/aggregated_" . $template;
-		}
-
-		if ( $place != null ) {
-			$paths->file = str_replace( "%place%", $place, $paths->file_pattern );
-		}
-
-		return $paths;
-	}
-
 
 	/**
 	 * Wrapps a Javascript code block inside a try and catch block.
@@ -103,33 +105,35 @@ class FileHandler {
 		return $code;
 	}
 
+
 	/**
-	 * rewrites the aggregated scripts
+	 * write content to file
+	 * @param $filename
+	 * @param $content
+	 *
+	 * @return bool
 	 */
-	function rewrite( $js_contents ) {
-		foreach ( $js_contents as $place => $content ) {
-			$paths = $this->paths( $place );
-			if ( ! is_dir( $paths->dir ) ) {
-				$success = mkdir( $paths->dir );
-				if ( ! $success ) {
-					return false;
-				}
-//				chmod($paths->dir, 0777);
-			}
-			if ( ! is_writable( $paths->dir ) ) {
+	function write($filename, $content){
+		$paths = $this->paths();
+		if ( ! is_dir( $paths->dir ) ) {
+			$success = mkdir( $paths->dir );
+			if ( ! $success ) {
 				return false;
 			}
-			$the_file        = rtrim( $paths->dir, "/" ) . "/" . $paths->file;
-			$aggregated_file = fopen( $the_file, 'w' );
-			fwrite( $aggregated_file, $content );
-			fclose( $aggregated_file );
+		}
+		if ( ! is_writable( $paths->dir ) ) {
+			return false;
+		}
+
+		$the_file_path        = rtrim( $paths->dir, "/" ) . "/" . $filename;
+
+		$the_file = fopen( $the_file_path, 'w' );
+		fwrite( $the_file, $content );
+		fclose( $the_file );
 
 //			chmod($the_file, 0777);
 
-			$this->purge( $paths->url . "/" . $paths->file );
-		}
-
-		return true;
+		$this->purge( $paths->url . "/" . $filename );
 	}
 
 	/**
