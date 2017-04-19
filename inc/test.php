@@ -31,8 +31,6 @@ class Test {
 	 */
 	function enqueue(){
 
-		//TODO: localization test
-
 		if(is_archive()){
 			wp_enqueue_script('aggregator-test-header-archive', $this->plugin->url."/test/header-archive.js");
 			wp_localize_script('aggregator-test-header-archive', 'AggregatorHeader', array("works" => 1));
@@ -44,5 +42,9 @@ class Test {
 			wp_enqueue_script('aggregator-test-footer-single', $this->plugin->url."/test/footer-single.js", null, 1 , true);
 			wp_localize_script('aggregator-test-footer-single', 'AggregatorFooterSingle', array("works" => 1));
 		}
+
+		// external test
+		wp_enqueue_script('external-underscore', 'http://underscorejs.org/underscore-min.js');
+
 	}
 }

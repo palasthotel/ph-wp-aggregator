@@ -176,6 +176,7 @@ class Scripts {
 		if ( is_array( $wp_scripts->queue ) ) {
 
 			$blog_info_url      = get_bloginfo( 'url' );
+			$blog_domain = str_replace(array('https://','http://', '//'),'', $blog_info_url);
 			$protocoll_relative = str_replace( array(
 				"http://",
 				"https://"
@@ -196,16 +197,50 @@ class Scripts {
 
 					$script = $wp_scripts->registered[ $js ];
 
+					if($script->src)
+
 					$obj = (object) array(
 						'handle'  => $js,
 						'src'     => $script->src,
-						'file_path'    => $script->src,
-						'url'     => $script->src,
+						'file_path'    => null,
+						'url'     => null,
 						'footer'  => false,
 						'changed' => '',
 						'extra_data'    => null,
+						'external' => false,
 					);
 
+					// TODO: handle src
+					// http://... https://... and //...
+					// or internal with /...
+
+					preg_match('/(http:|https:)?\/\/(.*)/', $obj->src, $matches);
+					if($matches){
+						if( strpos($matches[2], $blog_domain) !== false ){
+							$obj->file_path = ABSPATH.str_replace($blog_domain,'',$matches[2]);
+						}
+						$obj->url = $obj->src;
+					}
+
+					if(strpos($obj->src,'/') === 0){
+						$obj->file_path = rtrim(ABSPATH, '/').$obj->src;
+					}
+
+
+
+//					if ( strpos( $obj->src, $blog_info_url ) === 0 ) {
+//						$obj->url = substr( $obj->src, strlen( $blog_info_url ) + 1 );
+//
+//					} else if ( strpos( $obj->src, $protocoll_relative ) === 0 ) {
+//						$obj->url = substr( $obj->src, strlen( $protocoll_relative ) + 1 );
+//					} else {
+//						$obj->url = substr( $obj->src, 1 );
+//					}
+//					if ( strpos( $obj->url, "?" ) ) {
+//						$obj->url = substr( $obj->url, 0, strpos( $obj->url, "?" ) );
+//					}
+//
+//					$obj->file_path = ABSPATH.$obj->url;
 
 					if ( is_array( $script->extra ) ) {
 						$extra = $script->extra;
@@ -225,19 +260,8 @@ class Scripts {
 						}
 					}
 
-					if ( strpos( $obj->src, $blog_info_url ) === 0 ) {
-						$obj->url = substr( $obj->src, strlen( $blog_info_url ) + 1 );
 
-					} else if ( strpos( $obj->src, $protocoll_relative ) === 0 ) {
-						$obj->url = substr( $obj->src, strlen( $protocoll_relative ) + 1 );
-					} else {
-						$obj->url = substr( $obj->src, 1 );
-					}
-					if ( strpos( $obj->url, "?" ) ) {
-						$obj->url = substr( $obj->url, 0, strpos( $obj->url, "?" ) );
-					}
 
-					$obj->file_path = ABSPATH.$obj->url;
 
 					/*
 					 * check file time

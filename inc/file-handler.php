@@ -70,25 +70,43 @@ class FileHandler {
 	 */
 	function get_content( $script ) {
 		$js_content      = "";
-		$js_relative_url = $script->file_path;
-		$source_file     = fopen(  $js_relative_url, 'r' );
-		if ( $source_file ) {
-			$js_content .= "// AGGREGATOR Handle: ".$script->handle;
-			$js_content .= "// AGGREGATOR file: " . $script->url . "\n";
 
-			// extra data comes with wp_head and wp_footer. See Scripts class.
-
-			$js_content .= "// AGGREGATOR Content:\n";
-			$js_content .= $this->wrap_in_try_catch( fread( $source_file, filesize( $js_relative_url ) ) ) . "\n";
-			fclose( $source_file );
-			/**
-			 * remove source maps
-			 */
-			$js_content = str_replace( "sourceMappingURL", "", $js_content );
-			return $js_content;
+		if($script->file_path != null && file_exists($script->file_path)){
+			$source_file     = fopen(  $script->file_path, 'r' );
+			if ( $source_file ) {
+				return $this->wrap_content($script, fread( $source_file, filesize( $script->file_path ) ));
+			}
 		}
 
-		return false;
+		// if could not handle by file path get from url
+
+		$contents = file_get_contents($script->url);
+		return $this->wrap_content($script, $contents);
+
+	}
+
+	/**
+	 * wrap content with info
+	 * @param $script
+	 * @param $content
+	 *
+	 * @return string
+	 */
+	function wrap_content($script, $content){
+		$js_content = "";
+		$js_content .= "// AGGREGATOR Handle: ".$script->handle;
+		$js_content .= "// AGGREGATOR file: " . $script->url . "\n";
+
+		// extra data comes with wp_head and wp_footer. See Scripts class.
+
+		$js_content .= "// AGGREGATOR Content:\n";
+		$js_content .= $this->wrap_in_try_catch( $content ) . "\n";
+		/**
+		 * remove source maps
+		 */
+		$js_content = str_replace( "sourceMappingURL", "", $js_content );
+
+		return $js_content;
 	}
 
 	/**
