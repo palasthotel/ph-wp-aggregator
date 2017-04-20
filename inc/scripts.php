@@ -187,10 +187,6 @@ class Scripts {
 
 			$blog_info_url      = get_bloginfo( 'url' );
 			$blog_domain        = str_replace( array( 'https://', 'http://', '//' ), '', $blog_info_url );
-			$protocoll_relative = str_replace( array(
-				"http://",
-				"https://"
-			), "//", $blog_info_url );
 
 			/*
 			 * resolve dependencies
@@ -259,8 +255,8 @@ class Scripts {
 					/*
 					 * check file time
 					 */
-					if ( file_exists( $obj->url ) ) {
-						$obj->changed = filemtime( $obj->url );
+					if ( file_exists( $obj->file_path ) ) {
+						$obj->changed = filemtime( $obj->file_path );
 					}
 
 					$scripts[ $js ] = $obj;
