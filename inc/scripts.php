@@ -243,7 +243,7 @@ class Scripts {
 						}
 
 						/*
-						 * has extra data
+						 * has extra data like localization
 						 */
 
 						if ( isset( $extra["data"] ) && is_string( $extra['data'] ) ) {
