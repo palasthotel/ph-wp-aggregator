@@ -35,23 +35,18 @@ class Scripts {
 
 	function wp_head() {
 		$header = $this->get_header_scripts();
-		?>
-		<!-- START: Aggregator extra script data from header scripts -->
-		<?php
+		echo "\n<!-- START: Aggregator extra script data from header scripts -->\n";
+
 		$this->_render_script_data( $header );
-		?>
-		<!-- END: Aggregator extra script data from header scripts -->
-		<?php
+		echo "\n<!-- END: Aggregator extra script data from header scripts -->\n";
 	}
 
 	function wp_footer() {
 		$footer = $this->get_footer_scripts();
-		?>
-		<!-- START: Aggregator extra script data from footer scripts -->
-		<?php
-		$this->_render_script_data( $footer ); ?>
-		<!-- END: Aggregator extra script data from header scripts -->
-		<?php
+		echo "\n<!-- START: Aggregator extra script data from footer scripts -->\n";
+
+		$this->_render_script_data( $footer );
+		echo "\n<!-- END: Aggregator extra script data from footer scripts -->\n";
 	}
 
 	/**
@@ -195,7 +190,9 @@ class Scripts {
 
 			foreach ( $wp_scripts->to_do as $js ) {
 
-				if ( $this->is_ignored( $js ) ) {
+				// TODO: Remove deprecated get_ignores() call in future version.
+				if ( $this->is_ignored( $js ) ||
+					   in_array( $js, $this->get_ignores() ) ) {
 					continue;
 				}
 
@@ -308,8 +305,6 @@ class Scripts {
 	 * @return array
 	 */
 	function get_ignores() {
-		// TODO: handle deprecated filter
 		return apply_filters( Plugin::FILTER_IGNORED_FILES, array() );
 	}
-
 }

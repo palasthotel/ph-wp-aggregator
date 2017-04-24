@@ -4,7 +4,7 @@ Donate link: http://palasthotel.de/
 Tags: aggregator, seo, javascript
 Requires at least: 4.0
 Tested up to: 4.7.4
-Stable tag: 2.0.1
+Stable tag: 2.0.2
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl
 
@@ -14,11 +14,13 @@ Aggregates Javascript files to a footer and header file.
 
 It's best practise to have only a very few page requests. This plugin aggregates all your local JavaScript files to two requests only.
 
+
 == Installation ==
 
 1. Upload `aggragator-wordpress.zip` to the `/wp-content/plugins/` directory
 1. Extract the Plugin to a `aggregator` Folder
 1. Activate the plugin through the 'Plugins' menu in WordPress
+
 
 == Frequently Asked Questions ==
 
@@ -28,12 +30,16 @@ It's best practise to have only a very few page requests. This plugin aggregates
 
 == Changelog ==
 
+= 2.0.2 =
+* typos fixed (hook name and html comments)
+
 = 2.0.1 =
 * rerender on javascript content file changes
 
 = 2.0 =
 * we can handle different aggregation combinations now
 * scripts need to be rerendered
+* Hook `ph_aggregator_ignore` is marked as deprecated, please make sure to update your code to use the new hook `aggregator_ignore`, which provides a js handle argument.
 
 = 1.1.4 =
 * added try catch blocks around each javascript file to prevent script execution after an error
@@ -80,10 +86,9 @@ It's best practise to have only a very few page requests. This plugin aggregates
 * First release
 * aggregates JavaScript files
 
+
 == Upgrade Notice ==
 
 
 == Arbitrary section ==
-
-
 
