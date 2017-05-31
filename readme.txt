@@ -3,8 +3,8 @@ Contributors: palasthotel, edwardbock
 Donate link: http://palasthotel.de/
 Tags: aggregator, seo, javascript
 Requires at least: 4.0
-Tested up to: 4.7.4
-Stable tag: 2.0.2
+Tested up to: 4.7.5
+Stable tag: 2.0.3
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl
 
@@ -29,6 +29,9 @@ It's best practise to have only a very few page requests. This plugin aggregates
 
 
 == Changelog ==
+
+= 2.0.3 =
+* external scripts with https:// and // fix aggregation fix
 
 = 2.0.2 =
 * typos fixed (hook name and html comments)
