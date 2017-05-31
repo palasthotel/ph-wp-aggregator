@@ -77,6 +77,10 @@ class FileHandler {
 		$js_content      = "";
 
 		if($script->file_path != null && file_exists($script->file_path)){
+
+			// TODO: analyze url
+
+			// Variants: // , https:// , http:// , /
 			$source_file     = fopen(  $script->file_path, 'r' );
 			if ( $source_file ) {
 				return $this->wrap_content($script, fread( $source_file, filesize( $script->file_path ) ));
