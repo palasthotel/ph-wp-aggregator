@@ -74,13 +74,8 @@ class FileHandler {
 	 * @return boolean|string
 	 */
 	function get_content( $script ) {
-		$js_content      = "";
 
 		if($script->file_path != null && file_exists($script->file_path)){
-
-			// TODO: analyze url
-
-			// Variants: // , https:// , http:// , /
 			$source_file     = fopen(  $script->file_path, 'r' );
 			if ( $source_file ) {
 				return $this->wrap_content($script, fread( $source_file, filesize( $script->file_path ) ));
@@ -88,8 +83,19 @@ class FileHandler {
 		}
 
 		// if could not handle by file path get from url
+		$url = $script->url;
+		if(strpos($url,"//") === 0){
+			$url = "https:$url";
+		}
 
-		$contents = file_get_contents($script->url);
+		// if file get contents didn't work try curl
+		$ch = curl_init($url);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+		curl_setopt($ch, CURLOPT_BINARYTRANSFER, 1);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+		$contents = curl_exec($ch);
+		curl_close($ch);
+
 		return $this->wrap_content($script, $contents);
 
 	}

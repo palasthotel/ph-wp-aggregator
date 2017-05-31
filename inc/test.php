@@ -45,6 +45,8 @@ class Test {
 
 		// external test
 		wp_enqueue_script('external-underscore', 'http://underscorejs.org/underscore-min.js');
+		wp_enqueue_script('external-jquery-ssl', 'https://code.jquery.com/jquery-3.2.1.js');
+		wp_enqueue_script('external-jquery-slash', '//code.jquery.com/jquery-2.2.4.js');
 
 	}
 }
