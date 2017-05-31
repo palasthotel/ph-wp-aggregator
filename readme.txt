@@ -31,6 +31,7 @@ It's best practise to have only a very few page requests. This plugin aggregates
 == Changelog ==
 
 = 2.0.3 =
+* main php file rename
 * external scripts with https:// and // fix aggregation fix
 
 = 2.0.2 =
@@ -91,6 +92,8 @@ It's best practise to have only a very few page requests. This plugin aggregates
 
 
 == Upgrade Notice ==
+
+* you will have to reactivate the plugin because main php file was renamed in version 2.0.3
 
 
 == Arbitrary section ==
