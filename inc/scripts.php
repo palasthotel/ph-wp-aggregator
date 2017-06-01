@@ -213,19 +213,30 @@ class Scripts {
 						'external'   => false,
 					);
 
-
-					// http://... https://... and //...
-					preg_match( '/(http:|https:)?\/\/(.*)/', $obj->src, $matches );
-					if ( $matches ) {
-						if ( strpos( $matches[2], $blog_domain ) !== false ) {
-							$obj->file_path = ABSPATH . str_replace( $blog_domain, '', $matches[2] );
-						}
-						$obj->url = $obj->src;
+					$src = $obj->src;
+					// parse_url cannot use protocol relatives
+					if(strpos($src, "//") === 0){
+						$src = "http:$src";
 					}
+					$parsed = parse_url($src);
 
-					// or internal with /...
-					if ( $obj->file_path == null &&  strpos( $obj->src, '/' ) === 0 ) {
-						$obj->file_path = rtrim( ABSPATH, '/' ) . $obj->src;
+
+					if( !isset($parsed["host"]) && !empty($parsed["path"]) ){
+						// no host. just path on our own site
+						$guessed_path = ABSPATH . $parsed["path"];
+						if(file_exists($guessed_path)){
+							$obj->file_path = $guessed_path;
+						}
+					} else if(!empty($parsed["host"]) && !empty($parsed["path"])){
+						// is it own domain? we can try file path
+						$guessed_path = ABSPATH . $parsed["path"];
+						$port = (isset($parsed["port"]))? $parsed["port"]:"";
+						if ( ( $parsed["host"] == $blog_domain || $parsed["host"].":$port" == $blog_domain )
+						     && file_exists($guessed_path)) {
+							$obj->file_path = $guessed_path;
+						}
+						// fallback load via http
+						$obj->url = $src;
 					}
 
 					// if cannot resolve source skip it!
