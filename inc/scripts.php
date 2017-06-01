@@ -234,9 +234,24 @@ class Scripts {
 						if ( ( $parsed["host"] == $blog_domain || $parsed["host"].":$port" == $blog_domain )
 						     && file_exists($guessed_path)) {
 							$obj->file_path = $guessed_path;
+						} else {
+
+							// fallback load via http
+							$ch = curl_init($src);
+							curl_setopt($ch, CURLOPT_HEADER, true);    // we want headers
+							curl_setopt($ch, CURLOPT_NOBODY, true);    // we don't need body
+							curl_setopt($ch, CURLOPT_RETURNTRANSFER,1);
+							curl_setopt($ch, CURLOPT_TIMEOUT,10);
+							curl_exec($ch);
+							$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+							curl_close($ch);
+
+							if($http_code == 200){
+								$obj->url = $src;
+							}
 						}
-						// fallback load via http
-						$obj->url = $src;
+
+
 					}
 
 					// if cannot resolve source skip it!
