@@ -1,5 +1,5 @@
 
 (function($){
 	'use strict';
-	console.info("Footer archive", $ );
+	console.info("Footer archive", $);
 })(jQuery);

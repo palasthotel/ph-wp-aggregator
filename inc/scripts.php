@@ -200,18 +200,19 @@ class Scripts {
 
 					$script = $wp_scripts->registered[ $js ];
 
-					if ( $script->src ) {
-						$obj = (object) array(
-							'handle'     => $js,
-							'src'        => $script->src,
-							'file_path'  => null,
-							'url'        => null,
-							'footer'     => false,
-							'changed'    => '',
-							'extra_data' => null,
-							'external'   => false,
-						);
-					}
+					if ( !$script->src ) continue;
+
+					$obj = (object) array(
+						'handle'     => $js,
+						'src'        => $script->src,
+						'file_path'  => null,
+						'url'        => null,
+						'footer'     => false,
+						'changed'    => '',
+						'extra_data' => null,
+						'external'   => false,
+					);
+
 
 					// http://... https://... and //...
 					preg_match( '/(http:|https:)?\/\/(.*)/', $obj->src, $matches );
@@ -223,7 +224,7 @@ class Scripts {
 					}
 
 					// or internal with /...
-					if ( strpos( $obj->src, '/' ) === 0 ) {
+					if ( $obj->file_path == null &&  strpos( $obj->src, '/' ) === 0 ) {
 						$obj->file_path = rtrim( ABSPATH, '/' ) . $obj->src;
 					}
 

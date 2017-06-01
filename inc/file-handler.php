@@ -84,11 +84,12 @@ class FileHandler {
 
 		// if could not handle by file path get from url
 		$url = $script->url;
+
+		// curl cant handle protocol relative
 		if(strpos($url,"//") === 0){
 			$url = "https:$url";
 		}
 
-		// if file get contents didn't work try curl
 		$ch = curl_init($url);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 		curl_setopt($ch, CURLOPT_BINARYTRANSFER, 1);
@@ -115,7 +116,12 @@ class FileHandler {
 		// extra data comes with wp_head and wp_footer. See Scripts class.
 
 		$js_content .= "// AGGREGATOR Content:\n";
-		$js_content .= $this->wrap_in_try_catch( $content ) . "\n";
+		if($content == "" || $content === false){
+			$js_content .= $this->wrap_in_try_catch("console.error('Could not aggregate ".$script->handle." or file is empty.')")."\n";
+		} else {
+			$js_content .= $this->wrap_in_try_catch( $content ) . "\n";
+		}
+
 		/**
 		 * remove source maps
 		 */

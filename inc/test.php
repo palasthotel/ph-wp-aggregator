@@ -31,15 +31,17 @@ class Test {
 	 */
 	function enqueue(){
 
+		$deps = array('jquery');
+
 		if(is_archive()){
-			wp_enqueue_script('aggregator-test-header-archive', $this->plugin->url."/test/header-archive.js");
+			wp_enqueue_script('aggregator-test-header-archive', $this->plugin->url."/test/header-archive.js", $deps);
 			wp_localize_script('aggregator-test-header-archive', 'AggregatorHeader', array("works" => 1));
-			wp_enqueue_script('aggregator-test-footer-archive', $this->plugin->url."/test/footer-archive.js", null, 1, true);
+			wp_enqueue_script('aggregator-test-footer-archive', $this->plugin->url."/test/footer-archive.js", $deps, 1, true);
 			wp_localize_script('aggregator-test-footer-archive', 'AggregatorFooter', array("works" => 1));
 		} else if( is_singular()){
-			wp_enqueue_script('aggregator-test-header-single', $this->plugin->url."/test/header-single.js");
+			wp_enqueue_script('aggregator-test-header-single', $this->plugin->url."/test/header-single.js", $deps);
 			wp_localize_script('aggregator-test-header-single', 'AggregatorHeaderSingle', array("works" => 1));
-			wp_enqueue_script('aggregator-test-footer-single', $this->plugin->url."/test/footer-single.js", null, 1 , true);
+			wp_enqueue_script('aggregator-test-footer-single', $this->plugin->url."/test/footer-single.js", $deps, 1 , true);
 			wp_localize_script('aggregator-test-footer-single', 'AggregatorFooterSingle', array("works" => 1));
 		}
 
@@ -47,6 +49,7 @@ class Test {
 		wp_enqueue_script('external-underscore', 'http://underscorejs.org/underscore-min.js');
 		wp_enqueue_script('external-jquery-ssl', 'https://code.jquery.com/jquery-3.2.1.js');
 		wp_enqueue_script('external-jquery-slash', '//code.jquery.com/jquery-2.2.4.js');
+		wp_enqueue_script('error-script', '//this-is-no-valid-path.de');
 
 	}
 }
