@@ -23,17 +23,30 @@ class Scripts {
 		$this->_header_scripts = null;
 		$this->_footer_scritps = null;
 
-		add_action( 'wp_head', array( $this, "wp_head" ), 1 );
-		add_action( 'wp_footer', array( $this, "wp_footer" ) );
-
-		add_action( 'wp_enqueue_scripts', array(
-			$this,
-			'scripts'
-		), 9999 );
+		add_filter('wp_print_scripts', array($this, 'just_in_time_scripts'), 9999);
+		add_action('wp_print_scripts', array($this, 'scripts_data_head'), 0);
+		add_action('wp_print_footer_scripts', array($this, 'scripts_data_footer'), 0);
 
 	}
 
-	function wp_head() {
+	/**
+	 * Latest point of script manipulation
+	 * @param $arg
+	 *
+	 * @return mixed
+	 */
+	function just_in_time_scripts($arg){
+		if(!is_admin()){
+			// aggregate frontend js files
+			$this->scripts();
+		}
+		return $arg;
+	}
+
+	/**
+	 * render header data script info
+	 */
+	function scripts_data_head() {
 		$header = $this->get_header_scripts();
 		echo "\n<!-- START: Aggregator extra script data from header scripts -->\n";
 
@@ -41,7 +54,10 @@ class Scripts {
 		echo "\n<!-- END: Aggregator extra script data from header scripts -->\n";
 	}
 
-	function wp_footer() {
+	/**
+	 * render footer data script info
+	 */
+	function scripts_data_footer() {
 		$footer = $this->get_footer_scripts();
 		echo "\n<!-- START: Aggregator extra script data from footer scripts -->\n";
 
@@ -50,6 +66,7 @@ class Scripts {
 	}
 
 	/**
+	 * script data javascript
 	 * @param $scripts
 	 */
 	private function _render_script_data( $scripts ) {
@@ -88,11 +105,6 @@ class Scripts {
 
 		}
 
-		/*
-		 * dequeue scripts
-		 */
-		$this->dequeue( $header );
-		$this->dequeue( $footer );
 
 		/*
 		 * enqueue aggregated files
@@ -111,6 +123,16 @@ class Scripts {
 			filemtime( $this->plugin->file_handler->paths()->dir . "/{$footer_filename}" ),
 			true
 		);
+
+
+		/*
+		 * dequeue scripts
+		 */
+		$this->dequeue( $header );
+		$this->dequeue( $footer );
+
+
+
 	}
 
 	/**
@@ -191,8 +213,7 @@ class Scripts {
 			foreach ( $wp_scripts->to_do as $js ) {
 
 				// TODO: Remove deprecated get_ignores() call in future version.
-				if ( $this->is_ignored( $js ) ||
-					   in_array( $js, $this->get_ignores() ) ) {
+				if ( $this->is_ignored( $js ) || in_array( $js, $this->get_ignores() ) ) {
 					continue;
 				}
 
@@ -203,6 +224,7 @@ class Scripts {
 					if ( !$script->src ) continue;
 
 					$obj = (object) array(
+						'raw' => $script,
 						'handle'     => $js,
 						'src'        => $script->src,
 						'file_path'  => null,
@@ -236,12 +258,13 @@ class Scripts {
 							$obj->file_path = $guessed_path;
 						} else {
 
-							// fallback load via http
+							// fallback load via http check
 							$ch = curl_init($src);
-							curl_setopt($ch, CURLOPT_HEADER, true);    // we want headers
-							curl_setopt($ch, CURLOPT_NOBODY, true);    // we don't need body
+							curl_setopt($ch, CURLOPT_HEADER, true);
+							curl_setopt($ch, CURLOPT_NOBODY, true);
 							curl_setopt($ch, CURLOPT_RETURNTRANSFER,1);
 							curl_setopt($ch, CURLOPT_TIMEOUT,10);
+							curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
 							curl_exec($ch);
 							$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 							curl_close($ch);
@@ -299,23 +322,30 @@ class Scripts {
 	 *
 	 */
 	function dequeue( $scripts ) {
-		foreach ( $scripts as $script ) {
-			wp_dequeue_script( $script->handle );
-		}
+
 		global $wp_scripts;
 		if ( ! is_array( $wp_scripts->queue ) ) {
 			return;
 		}
+
 		$wp_scripts->all_deps( $wp_scripts->queue );
+
 		for ( $i = 0; $i < count( $wp_scripts->to_do ); $i ++ ) {
+
 			$handle = $wp_scripts->to_do[ $i ];
-			if ( isset( $scripts[ $handle ] ) ) {
-				$wp_scripts->remove( $handle );
-				unset( $wp_scripts->registered[ $handle ] );
-				array_splice( $wp_scripts->to_do, $i, 1 );
-				$i --;
+
+			foreach($scripts as $script){
+
+				if($handle == $script->handle){
+					wp_dequeue_script( $handle );
+					$wp_scripts->remove( $handle );
+					array_splice( $wp_scripts->to_do, $i, 1 );
+					$i --;
+
+				}
 			}
 		}
+
 	}
 
 	/**
