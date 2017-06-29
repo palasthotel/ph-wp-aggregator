@@ -54,9 +54,13 @@ class FileHandler {
 	 */
 	function aggregate_and_write($filename, $scripts){
 		$content = "";
+		$index = "";
 		foreach ($scripts as $handle => $script){
+			if( WP_DEBUG ) $index .= " // - $handle {$script->file_path}\n";
 			$content.= $this->get_content($script);
 		}
+
+		$content = "$index" .$content;
 
 		if( get_option(Plugin::OPTION_MINIFY, Plugin::OPTION_MINIFY_ON)){
 			require_once $this->plugin->dir."/lib/minifier.php";
