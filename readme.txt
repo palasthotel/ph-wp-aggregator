@@ -3,8 +3,8 @@ Contributors: palasthotel, edwardbock
 Donate link: http://palasthotel.de/
 Tags: aggregator, seo, javascript
 Requires at least: 4.0
-Tested up to: 4.7.5
-Stable tag: 2.0.3
+Tested up to: 4.8
+Stable tag: 2.0.4
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl
 
@@ -29,6 +29,9 @@ It's best practise to have only a very few page requests. This plugin aggregates
 
 
 == Changelog ==
+
+= 2.0.4 =
+* localize scripts on wp_print_scripts action fix
 
 = 2.0.3 =
 * main php file rename
