@@ -5,6 +5,8 @@ namespace Aggregator;
 
 class FileHandler {
 
+	const DIRNAME = "aggregated";
+
 	/**
 	 * FileHandler constructor.
 	 *
@@ -34,15 +36,15 @@ class FileHandler {
 
 		if ( $location == Plugin::OPTION_FILE_LOCATION_THEME ) {
 			return (object) array(
-				'dir'          => rtrim( get_stylesheet_directory(), "/" ) . "/aggregated",
-				'url'          => rtrim( get_stylesheet_directory_uri(), "/" ) . "/aggregated",
+				'dir'          => rtrim( get_stylesheet_directory(), "/" ) . "/".self::DIRNAME,
+				'url'          => rtrim( get_stylesheet_directory_uri(), "/" ) . "/".self::DIRNAME,
 			);
 		}
 
 		$uploads    = wp_upload_dir();
 		return (object) array(
-			'dir'          => rtrim( $uploads["basedir"], "/" ) . "/aggregated",
-			'url'          => rtrim( $uploads["baseurl"], "/" ) . "/aggregated",
+			'dir'          => rtrim( $uploads["basedir"], "/" ) . "/".self::DIRNAME,
+			'url'          => rtrim( $uploads["baseurl"], "/" ) . "/".self::DIRNAME,
 		);
 
 	}
