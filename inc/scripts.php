@@ -11,6 +11,9 @@ namespace Aggregator;
 
 class Scripts {
 
+	const FILENAME_SUFFIX_HEADER = "-header";
+	const FILENAME_SUFFIX_FOOTER = "-footer";
+
 	/**
 	 * Enqueue constructor.
 	 *
@@ -23,10 +26,35 @@ class Scripts {
 		$this->_header_scripts = null;
 		$this->_footer_scritps = null;
 
+		add_filter('script_loader_tag', array($this, 'script_loader_tag'), 10, 3 );
 		add_filter('wp_print_scripts', array($this, 'just_in_time_scripts'), 9999);
 		add_action('wp_print_scripts', array($this, 'scripts_data_head'), 0);
 		add_action('wp_print_footer_scripts', array($this, 'scripts_data_footer'), 0);
 
+	}
+
+	/**
+	 * @param $tag
+	 * @param $handle
+	 * @param $src
+	 *
+	 * @return string
+	 */
+	function script_loader_tag($tag, $handle, $src){
+		$additional = '';
+		switch($handle){
+			case Plugin::HANDLE_HEADER:
+				$additional = get_option(Plugin::OPTION_HEADER_SCRIPT_ATTRIBUTES, '');
+				break;
+			case Plugin::HANDLE_FOOTER:
+				$additional = get_option(Plugin::OPTION_FOOTER_SCRIPT_ATTRIBUTES, '');
+				break;
+
+		}
+		if($additional != ''){
+			return "<script type='text/javascript' src='$src' {$additional}></script>";
+		}
+		return $tag;
 	}
 
 	/**
@@ -124,14 +152,11 @@ class Scripts {
 			true
 		);
 
-
 		/*
 		 * dequeue scripts
 		 */
 		$this->dequeue( $header );
 		$this->dequeue( $footer );
-
-
 
 	}
 
@@ -146,7 +171,7 @@ class Scripts {
 		$prefix = "";
 		foreach ( $scripts as $script ) {
 			$ids[]    = "{$script->handle}-{$script->url}-{$script->changed}";
-			$post_fix = ( $script->footer ) ? "-footer" : "-header";
+			$post_fix = ( $script->footer ) ? self::FILENAME_SUFFIX_FOOTER : self::FILENAME_SUFFIX_HEADER;
 			$prefix = ($script->footer)? "f": "h";
 		}
 
