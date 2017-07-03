@@ -5,7 +5,6 @@ namespace Aggregator;
 class Settings {
 
 	const MENU_SLUG = "aggregator";
-
 	const OPTION_CC = "aggregator_clear_cache";
 
 	/**
@@ -58,6 +57,7 @@ class Settings {
 		register_setting( self::MENU_SLUG, Plugin::OPTION_FILE_LOCATION );
 		register_setting( self::MENU_SLUG, Plugin::OPTION_MINIFY );
 		register_setting( self::MENU_SLUG, Plugin::OPTION_HEADER_SCRIPT_ATTRIBUTES );
+		register_setting( self::MENU_SLUG, Plugin::OPTION_FOOTER_SCRIPT_ATTRIBUTES );
 		register_setting( self::MENU_SLUG, self::OPTION_CC, array( $this, 'clear_cache' ) );
 
 	}
@@ -145,8 +145,11 @@ class Settings {
 	function field_header_attributes() {
 
 		$value = get_option( Plugin::OPTION_HEADER_SCRIPT_ATTRIBUTES, '' );
+
 		?>
-		<code>&lt;script src="...-header.js" <input type="text" value="<?php echo $value; ?>" name="<?php echo Plugin::OPTION_HEADER_SCRIPT_ATTRIBUTES; ?>" />&gt;&lt;/script&gt;</code>
+		<code>&lt;script src="...-header.js" &gt;<select style="min-width: 100px;" name="<?php echo Plugin::OPTION_HEADER_SCRIPT_ATTRIBUTES ?>">
+				<?php $this->render_script_attribute_options($value); ?>
+			</select>&lt;/script&gt;</code>
 		<?php
 
 	}
@@ -158,9 +161,27 @@ class Settings {
 
 		$value = get_option( Plugin::OPTION_FOOTER_SCRIPT_ATTRIBUTES, '' );
 		?>
-		<code>&lt;script src="...-footer.js" <input type="text" value="<?php echo $value; ?>" name="<?php echo Plugin::OPTION_FOOTER_SCRIPT_ATTRIBUTES; ?>" />&gt;&lt;/script&gt;</code>
+		<code>&lt;script src="...-footer.js" <select style="min-width: 100px;" name="<?php echo Plugin::OPTION_FOOTER_SCRIPT_ATTRIBUTES ?>">
+				<?php $this->render_script_attribute_options($value); ?>
+			</select>&gt;&lt;/script&gt;</code>
 		<?php
 
+	}
+
+	private function render_script_attribute_options($value){
+		?>
+			<option value=""></option>
+			<option
+					value="defer"
+				<?php echo( $value == "defer"? 'selected' : '' ); ?>
+			>defer
+			</option>
+			<option
+					value="async"
+				<?php echo( $value == "async"? 'selected' : '' ); ?>
+			>async
+			</option>
+		<?php
 	}
 
 	/**
