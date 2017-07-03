@@ -36,6 +36,16 @@ class Settings {
 			$this,
 			'field_file_location'
 		), self::MENU_SLUG, self::MENU_SLUG );
+
+		add_settings_field( Plugin::OPTION_HEADER_SCRIPT_ATTRIBUTES, __( 'Additional header script attributes', Plugin::DOMAIN ), array(
+			$this,
+			'field_header_attributes'
+		), self::MENU_SLUG, self::MENU_SLUG );
+		add_settings_field( Plugin::OPTION_FOOTER_SCRIPT_ATTRIBUTES, __( 'Additional footer script attributes', Plugin::DOMAIN ), array(
+			$this,
+			'field_footer_attributes'
+		), self::MENU_SLUG, self::MENU_SLUG );
+
 		add_settings_field( Plugin::OPTION_MINIFY, __( 'Minify?', Plugin::DOMAIN ), array(
 			$this,
 			'field_minify'
@@ -47,8 +57,8 @@ class Settings {
 
 		register_setting( self::MENU_SLUG, Plugin::OPTION_FILE_LOCATION );
 		register_setting( self::MENU_SLUG, Plugin::OPTION_MINIFY );
+		register_setting( self::MENU_SLUG, Plugin::OPTION_HEADER_SCRIPT_ATTRIBUTES );
 		register_setting( self::MENU_SLUG, self::OPTION_CC, array( $this, 'clear_cache' ) );
-
 
 	}
 
@@ -111,7 +121,7 @@ class Settings {
 
 		$setting = get_option( Plugin::OPTION_FILE_LOCATION, Plugin::OPTION_FILE_LOCATION_UPLOADS );
 		?>
-		<select name="aggregator_file_location">
+		<select name="<?php echo Plugin::OPTION_FILE_LOCATION; ?>">
 			<option
 					value="<?php echo Plugin::OPTION_FILE_LOCATION_UPLOADS; ?>"
 				<?php echo( $setting == Plugin::OPTION_FILE_LOCATION_UPLOADS ? 'selected' : '' ); ?>
@@ -125,6 +135,30 @@ class Settings {
 			</option>
 
 		</select>
+		<?php
+
+	}
+
+	/**
+	 * header script attributes
+	 */
+	function field_header_attributes() {
+
+		$value = get_option( Plugin::OPTION_HEADER_SCRIPT_ATTRIBUTES, '' );
+		?>
+		<code>&lt;script src="...-header.js" <input type="text" value="<?php echo $value; ?>" name="<?php echo Plugin::OPTION_HEADER_SCRIPT_ATTRIBUTES; ?>" />&gt;&lt;/script&gt;</code>
+		<?php
+
+	}
+
+	/**
+	 * footer script attributes
+	 */
+	function field_footer_attributes() {
+
+		$value = get_option( Plugin::OPTION_FOOTER_SCRIPT_ATTRIBUTES, '' );
+		?>
+		<code>&lt;script src="...-footer.js" <input type="text" value="<?php echo $value; ?>" name="<?php echo Plugin::OPTION_FOOTER_SCRIPT_ATTRIBUTES; ?>" />&gt;&lt;/script&gt;</code>
 		<?php
 
 	}
