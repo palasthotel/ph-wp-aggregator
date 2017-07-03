@@ -60,6 +60,8 @@ class Settings {
 		register_setting( self::MENU_SLUG, Plugin::OPTION_FOOTER_SCRIPT_ATTRIBUTES );
 		register_setting( self::MENU_SLUG, self::OPTION_CC, array( $this, 'clear_cache' ) );
 
+
+
 	}
 
 	/**
@@ -99,17 +101,32 @@ class Settings {
 	 */
 	function section_stats() {
 		$paths = $this->plugin->file_handler->paths();
-		echo "In {$paths->url} <br>";
-
 		$files = $this->plugin->file_handler->get_all_files();
 
-		echo "Einträge:<br>";
-		foreach ( $files as $file ) {
-			echo "$file<br>";
-		}
+		?>
+		<p>Es gibt <?php echo count( $files ) ?> aggregierte JavaScript Dateien in <code><?php echo $paths->url; ?></code>
 
-		$files_count = count( $files );
-		echo "{$files_count} aggregierte JavaScript Dateien";
+		<div>
+			<button class="button" type="button" id="aggregator-legend" >Details</button>
+			<div id="aggregator-details" style="display: none; border: 1px solid #d3d3d3; background-color: white; padding: 10px 15px;">
+				<?php
+				foreach ( $files as $file ) {
+					echo "<p>$file</p>";
+				}
+				?>
+			</div>
+		</div>
+		<script>
+			document.getElementById('aggregator-legend').addEventListener('click',function(){
+				if(document.getElementById('aggregator-details').style.display == "block"){
+					document.getElementById('aggregator-details').style.display = "none";
+				} else {
+					document.getElementById('aggregator-details').style.display = "block";
+				}
+			});
+		</script>
+
+		<?php
 
 	}
 
