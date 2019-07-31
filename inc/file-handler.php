@@ -3,6 +3,9 @@
 namespace Aggregator;
 
 
+/**
+ * @property \Aggregator\Plugin plugin
+ */
 class FileHandler {
 
 	const DIRNAME = "aggregated";
@@ -53,6 +56,8 @@ class FileHandler {
 	/**
 	 * @param $filename
 	 * @param $scripts
+	 *
+	 * @throws \Exception
 	 */
 	function aggregate_and_write($filename, $scripts){
 		$content = "";

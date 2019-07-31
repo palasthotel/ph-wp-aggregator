@@ -2,6 +2,9 @@
 
 namespace Aggregator;
 
+/**
+ * @property \Aggregator\Plugin plugin
+ */
 class Settings {
 
 	const MENU_SLUG = "aggregator";
@@ -17,6 +20,8 @@ class Settings {
 		$this->plugin = $plugin;
 		add_action( 'admin_menu', array( $this, 'menu_pages' ) );
 		add_action( 'admin_init', array( $this, 'admin_init' ) );
+
+		add_filter('plugin_action_links_' . $plugin->basename, array($this, 'add_action_links'));
 	}
 
 	/**
@@ -60,18 +65,23 @@ class Settings {
 		register_setting( self::MENU_SLUG, Plugin::OPTION_FOOTER_SCRIPT_ATTRIBUTES );
 		register_setting( self::MENU_SLUG, self::OPTION_CC, array( $this, 'clear_cache' ) );
 
-
-
 	}
 
 	/**
 	 * add menu
 	 */
 	function menu_pages() {
-		add_submenu_page( 'options-general.php', 'Aggregator', 'Aggregator', 'manage_options', "aggregator", array(
-			$this,
-			"render"
-		) );
+		add_submenu_page(
+			'options-general.php',
+			'Aggregator',
+			'Aggregator',
+			'manage_options',
+			"aggregator",
+			array(
+				$this,
+				"render"
+			)
+		);
 	}
 
 	/**
@@ -235,6 +245,18 @@ class Settings {
 		}
 
 		return '';
+	}
+
+	/**
+	 * action link to settings on plugins list page
+	 * @param $links
+	 *
+	 * @return array
+	 */
+	public function add_action_links($links){
+		return array_merge($links, array(
+			'<a href="'.admin_url('options-general.php?page='.self::MENU_SLUG).'">Settings</a>'
+		));
 	}
 
 }

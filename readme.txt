@@ -2,7 +2,7 @@
 Contributors: palasthotel, edwardbock
 Donate link: http://palasthotel.de/
 Tags: aggregator, seo, javascript
-Requires at least: 4.1
+Requires at least: 5.2.2
 Tested up to: 4.8
 Stable tag: 2.1
 License: GPLv3

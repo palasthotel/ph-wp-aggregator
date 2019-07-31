@@ -8,6 +8,7 @@ namespace Aggregator;
  * Version: 2.1
  * Author: Palasthotel <rezeption@palasthotel.de> (Edward Bock)
  * Author URI: https://palasthotel.de
+ *
  */
 
 // If this file is called directly, abort.
@@ -15,6 +16,15 @@ if ( ! defined( 'WPINC' ) ) {
 	die;
 }
 
+/**
+ * @property string dir
+ * @property string url
+ * @property \Aggregator\Settings settings
+ * @property \Aggregator\FileHandler file_handler
+ * @property \Aggregator\Scripts scripts
+ * @property \Aggregator\Test test
+ * @property string basename
+ */
 class Plugin {
 
 	const DOMAIN = "aggregator";
@@ -51,6 +61,7 @@ class Plugin {
 		 */
 		$this->dir = plugin_dir_path( __FILE__ );
 		$this->url = plugin_dir_url( __FILE__ );
+		$this->basename = plugin_basename(__FILE__);
 
 		/*
 		 * classes

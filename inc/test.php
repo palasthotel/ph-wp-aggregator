@@ -9,6 +9,9 @@
 namespace Aggregator;
 
 
+/**
+ * @property \Aggregator\Plugin plugin
+ */
 class Test {
 
 	const GET_TEST = "_aggregator_test";

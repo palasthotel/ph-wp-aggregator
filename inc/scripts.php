@@ -9,6 +9,11 @@
 namespace Aggregator;
 
 
+/**
+ * @property \Aggregator\Plugin plugin
+ * @property array|null _header_scripts
+ * @property array|null _footer_scripts
+ */
 class Scripts {
 
 	const FILENAME_SUFFIX_HEADER = "-header";
@@ -24,7 +29,7 @@ class Scripts {
 		$this->plugin = $plugin;
 
 		$this->_header_scripts = null;
-		$this->_footer_scritps = null;
+		$this->_footer_scripts = null;
 
 		add_filter('script_loader_tag', array($this, 'script_loader_tag'), 10, 3 );
 		add_filter('wp_print_scripts', array($this, 'just_in_time_scripts'), 9999);
@@ -49,7 +54,6 @@ class Scripts {
 			case Plugin::HANDLE_FOOTER:
 				$additional = get_option(Plugin::OPTION_FOOTER_SCRIPT_ATTRIBUTES, '');
 				break;
-
 		}
 		if($additional != ''){
 			return "<script type='text/javascript' src='$src' {$additional}></script>";
@@ -194,11 +198,11 @@ class Scripts {
 	 * @return array
 	 */
 	function get_footer_scripts() {
-		if ( $this->_footer_scritps == null ) {
-			$this->_footer_scritps = $this->_get_scripts( true );
+		if ( $this->_footer_scripts == null ) {
+			$this->_footer_scripts = $this->_get_scripts( true );
 		}
 
-		return $this->_footer_scritps;
+		return $this->_footer_scripts;
 	}
 
 	/**
