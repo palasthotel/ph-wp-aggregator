@@ -121,46 +121,53 @@ class Scripts {
 		$header          = $this->get_header_scripts();
 		$header_filename = $this->get_js_filename( $header );
 
-		if ( ! $this->plugin->file_handler->file_exists( $header_filename ) ) {
+		if ( ! $this->plugin->file_handler->file_exists( $header_filename ) && count($header) > 0 ) {
 			// aggregate new header js
-			$this->plugin->file_handler->aggregate_and_write( $header_filename, $header );
-
+			try{
+				$this->plugin->file_handler->aggregate_and_write( $header_filename, $header );
+			} catch ( \Exception $e ) {
+				error_log($e->getMessage());
+			}
 		}
 
 
 		$footer          = $this->get_footer_scripts();
 		$footer_filename = $this->get_js_filename( $footer );
 
-		if ( ! $this->plugin->file_handler->file_exists( $footer_filename ) ) {
+		if ( ! $this->plugin->file_handler->file_exists( $footer_filename ) && count($footer) > 0 ) {
 			// aggregate new footer js
-			$this->plugin->file_handler->aggregate_and_write( $footer_filename, $footer );
-
+			try{
+				$this->plugin->file_handler->aggregate_and_write( $footer_filename, $footer );
+			} catch ( \Exception $e ) {
+				error_log($e->getMessage());
+			}
 		}
 
 
 		/*
 		 * enqueue aggregated files
 		 */
-		wp_enqueue_script(
-			Plugin::HANDLE_HEADER,
-			$this->plugin->file_handler->paths()->url . "/{$header_filename}",
-			null,
-			filemtime( $this->plugin->file_handler->paths()->dir . "/{$header_filename}" ),
-			false
-		);
-		wp_enqueue_script(
-			Plugin::HANDLE_FOOTER,
-			$this->plugin->file_handler->paths()->url . "/{$footer_filename}",
-			null,
-			filemtime( $this->plugin->file_handler->paths()->dir . "/{$footer_filename}" ),
-			true
-		);
+		if(is_file($this->plugin->file_handler->paths()->dir . "/{$header_filename}")){
+			wp_enqueue_script(
+				Plugin::HANDLE_HEADER,
+				$this->plugin->file_handler->paths()->url . "/{$header_filename}",
+				null,
+				filemtime( $this->plugin->file_handler->paths()->dir . "/{$header_filename}" ),
+				false
+			);
+			$this->dequeue( $header );
+		}
 
-		/*
-		 * dequeue scripts
-		 */
-		$this->dequeue( $header );
-		$this->dequeue( $footer );
+		if(is_file($this->plugin->file_handler->paths()->dir . "/{$footer_filename}")){
+			wp_enqueue_script(
+				Plugin::HANDLE_FOOTER,
+				$this->plugin->file_handler->paths()->url . "/{$footer_filename}",
+				null,
+				filemtime( $this->plugin->file_handler->paths()->dir . "/{$footer_filename}" ),
+				true
+			);
+			$this->dequeue( $footer );
+		}
 
 	}
 
