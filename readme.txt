@@ -31,6 +31,7 @@ It's best practise to have only a very few page requests. This plugin aggregates
 == Changelog ==
 
 = 2.1.1 =
+* only add aggregated file if not empty
 * tiny refactorings
 
 = 2.1 =
