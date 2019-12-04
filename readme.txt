@@ -2,9 +2,9 @@
 Contributors: palasthotel, edwardbock
 Donate link: http://palasthotel.de/
 Tags: aggregator, seo, javascript
-Requires at least: 5.2.2
-Tested up to: 4.8
-Stable tag: 2.1.1
+Requires at least: 4.8
+Tested up to: 5.3
+Stable tag: 2.1.2
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl
 
@@ -29,6 +29,9 @@ It's best practise to have only a very few page requests. This plugin aggregates
 
 
 == Changelog ==
+
+= 2.1.2 =
+* PHP 7.3 compatibility update
 
 = 2.1.1 =
 * only add aggregated file if not empty
