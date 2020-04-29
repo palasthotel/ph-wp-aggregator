@@ -40,6 +40,7 @@ class Plugin {
 	const OPTION_MINIFY_ON = "1";
 
 	const FILTER_IGNORE_FILE = "aggregator_ignore";
+	const FILTER_INCLUDE_EXTERNAL = "aggregator_include_external";
 	/**
 	 * @deprecated
 	 */

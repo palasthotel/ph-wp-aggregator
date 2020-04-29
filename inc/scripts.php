@@ -292,7 +292,7 @@ class Scripts {
 						if ( ( $parsed["host"] == $blog_domain || $parsed["host"].":$port" == $blog_domain )
 						     && file_exists($guessed_path)) {
 							$obj->file_path = $guessed_path;
-						} else {
+						} else if ( apply_filters( Plugin::FILTER_INCLUDE_EXTERNAL, false) === true ) {
 
 							// fallback load via http check
 							$ch = curl_init($src);
