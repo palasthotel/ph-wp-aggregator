@@ -4,7 +4,7 @@ Donate link: http://palasthotel.de/
 Tags: aggregator, seo, javascript
 Requires at least: 4.8
 Tested up to: 5.3
-Stable tag: 2.1.2
+Stable tag: 3.0.0
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl
 
@@ -29,6 +29,11 @@ It's best practise to have only a very few page requests. This plugin aggregates
 
 
 == Changelog ==
+
+= 3.0.0 =
+* Preserves extra scripts added via `wp_add_inline_script`
+* Remove HTML comments
+* Add filter `aggregator_include_external` to also aggregate external scripts. CAUTION: This was default in previous versions, now defaults to `false`!
 
 = 2.1.2 =
 * PHP 7.3 compatibility update
