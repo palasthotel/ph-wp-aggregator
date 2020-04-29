@@ -80,10 +80,7 @@ class Scripts {
 	 */
 	function scripts_data_head() {
 		$header = $this->get_header_scripts();
-		echo "\n<!-- START: Aggregator extra script data from header scripts -->\n";
-
 		$this->_render_script_data( $header );
-		echo "\n<!-- END: Aggregator extra script data from header scripts -->\n";
 	}
 
 	/**
@@ -91,10 +88,7 @@ class Scripts {
 	 */
 	function scripts_data_footer() {
 		$footer = $this->get_footer_scripts();
-		echo "\n<!-- START: Aggregator extra script data from footer scripts -->\n";
-
 		$this->_render_script_data( $footer );
-		echo "\n<!-- END: Aggregator extra script data from footer scripts -->\n";
 	}
 
 	/**
