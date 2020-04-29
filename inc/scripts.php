@@ -390,7 +390,7 @@ class Scripts {
 	 * @return bool
 	 */
 	function is_ignored( $js_handle ) {
-		return apply_filters( Plugin::FILTER_IGNORE_FILE, false, $js_handle );
+		return apply_filters( Plugin::FILTER_IGNORE_HANDLE, false, $js_handle );
 	}
 
 	/**
