@@ -93,6 +93,10 @@ class FileHandler {
 			}
 		}
 
+		if ( apply_filters( Plugin::FILTER_INCLUDE_EXTERNAL, false) !== true ) {
+			return null;
+		}
+
 		// if could not handle by file path get from url
 		$url = $script->url;
 

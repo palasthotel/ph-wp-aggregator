@@ -33,8 +33,10 @@ class Scripts {
 
 		add_filter('script_loader_tag', array($this, 'script_loader_tag'), 10, 3 );
 		add_filter('wp_print_scripts', array($this, 'just_in_time_scripts'), 9999);
-		add_action('wp_print_scripts', array($this, 'scripts_data_head'), 0);
-		add_action('wp_print_footer_scripts', array($this, 'scripts_data_footer'), 0);
+		add_action('wp_print_scripts', array($this, 'scripts_data_head_before'), 0);
+		add_action('wp_print_scripts', array($this, 'scripts_data_head_after'), 20);
+		add_action('wp_print_footer_scripts', array($this, 'scripts_data_footer_before'), 0);
+		add_action('wp_print_footer_scripts', array($this, 'scripts_data_footer_after'), 20);
 
 	}
 
@@ -78,39 +80,68 @@ class Scripts {
 	/**
 	 * render header data script info
 	 */
-	function scripts_data_head() {
+	function scripts_data_head_before() {
 		$header = $this->get_header_scripts();
-		echo "\n<!-- START: Aggregator extra script data from header scripts -->\n";
+		$this->_render_script_data_before( $header );
+	}
 
-		$this->_render_script_data( $header );
-		echo "\n<!-- END: Aggregator extra script data from header scripts -->\n";
+	/**
+	 * render header data script info
+	 */
+	function scripts_data_head_after() {
+		$header = $this->get_header_scripts();
+		$this->_render_script_data_after( $header );
 	}
 
 	/**
 	 * render footer data script info
 	 */
-	function scripts_data_footer() {
+	function scripts_data_footer_before() {
 		$footer = $this->get_footer_scripts();
-		echo "\n<!-- START: Aggregator extra script data from footer scripts -->\n";
+		$this->_render_script_data_before( $footer );
+	}
 
-		$this->_render_script_data( $footer );
-		echo "\n<!-- END: Aggregator extra script data from footer scripts -->\n";
+	/**
+	 * render footer data script info
+	 */
+	function scripts_data_footer_after() {
+		$footer = $this->get_footer_scripts();
+		$this->_render_script_data_after( $footer );
 	}
 
 	/**
 	 * script data javascript
 	 * @param $scripts
 	 */
-	private function _render_script_data( $scripts ) {
+	private function _render_script_data_before( $scripts ) {
 		foreach ( $scripts as $script ) {
-			if ( $script->extra_data == null || $script->extra_data == "" ) {
-				continue;
+			if ( ! empty( $script->extra_data ) ) {
+				$this->_render_inline_script_tag( $script->extra_data );
 			}
-			$extra = $script->extra_data;
-			?>
-			<script type="text/javascript"><?php echo $extra; ?></script>
-			<?php
+			if ( is_array( $script->extra_before ) && ! empty( $script->extra_before ) ) {
+				foreach ( $script->extra_before as $before ) {
+					$this->_render_inline_script_tag( $before );
+				}
+			}
 		}
+	}
+
+	/**
+	 * script data javascript
+	 * @param $scripts
+	 */
+	private function _render_script_data_after( $scripts ) {
+		foreach ( $scripts as $script ) {
+			if ( is_array( $script->extra_after ) && ! empty( $script->extra_after ) ) {
+				foreach ( $script->extra_after as $after ) {
+					$this->_render_inline_script_tag( $after );
+				}
+			}
+		}
+	}
+
+	private function _render_inline_script_tag( $javascript_code ) {
+		printf( '<script type="text/javascript">%s</script>' . PHP_EOL, $javascript_code );
 	}
 
 	/**
@@ -268,6 +299,8 @@ class Scripts {
 						'footer'     => false,
 						'changed'    => '',
 						'extra_data' => null,
+						'extra_before' => null,
+						'extra_after' => null,
 						'external'   => false,
 					);
 
@@ -277,7 +310,6 @@ class Scripts {
 						$src = "http:$src";
 					}
 					$parsed = parse_url($src);
-
 
 					if( !isset($parsed["host"]) && !empty($parsed["path"]) ){
 						// no host. just path on our own site
@@ -290,9 +322,9 @@ class Scripts {
 						$guessed_path = ABSPATH . $parsed["path"];
 						$port = (isset($parsed["port"]))? $parsed["port"]:"";
 						if ( ( $parsed["host"] == $blog_domain || $parsed["host"].":$port" == $blog_domain )
-						     && file_exists($guessed_path)) {
+							&& file_exists($guessed_path)) {
 							$obj->file_path = $guessed_path;
-						} else {
+						} else if ( apply_filters( Plugin::FILTER_INCLUDE_EXTERNAL, false) === true ) {
 
 							// fallback load via http check
 							$ch = curl_init($src);
@@ -326,11 +358,36 @@ class Scripts {
 						}
 
 						/*
-						 * has extra data like localization
+						 * has extra data like localization and inline scripts
 						 */
-
-						if ( isset( $extra["data"] ) && is_string( $extra['data'] ) ) {
-							$obj->extra_data = $extra["data"];
+						if ( is_string( $extra['data'] ) && ! empty( $extra['data'] ) ) {
+							$obj->extra_data = $extra['data'];
+						}
+						if ( is_array( $extra['before'] ) ) {
+							$befores = [];
+							foreach ( $extra['before'] as $before ) {
+								// there might be boolean values in this array
+								if ( ! is_string( $before ) ) {
+									continue;
+								}
+								$befores[] = $before;
+							}
+							if ( ! empty( $befores ) ) {
+								$obj->extra_before = $befores;
+							}
+						}
+						if ( is_array( $extra['after'] ) ) {
+							$afters = [];
+							foreach ( $extra['after'] as $after ) {
+								// there might be boolean values in this array
+								if ( ! is_string( $after ) ) {
+									continue;
+								}
+								$afters[] = $after;
+							}
+							if ( ! empty( $afters ) ) {
+								$obj->extra_after = $afters;
+							}
 						}
 					}
 
@@ -390,7 +447,7 @@ class Scripts {
 	 * @return bool
 	 */
 	function is_ignored( $js_handle ) {
-		return apply_filters( Plugin::FILTER_IGNORE_FILE, false, $js_handle );
+		return apply_filters( Plugin::FILTER_IGNORE_HANDLE, false, $js_handle );
 	}
 
 	/**

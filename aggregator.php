@@ -5,7 +5,7 @@ namespace Aggregator;
 /**
  * Plugin Name: Aggregator
  * Description: Aggregates js files.
- * Version: 2.1.2
+ * Version: 3.0.0
  * Author: Palasthotel <rezeption@palasthotel.de> (Edward Bock)
  * Author URI: https://palasthotel.de
  *
@@ -39,7 +39,8 @@ class Plugin {
 	const OPTION_MINIFY = "aggregator_minify";
 	const OPTION_MINIFY_ON = "1";
 
-	const FILTER_IGNORE_FILE = "aggregator_ignore";
+	const FILTER_IGNORE_HANDLE = "aggregator_ignore";
+	const FILTER_INCLUDE_EXTERNAL = "aggregator_include_external";
 	/**
 	 * @deprecated
 	 */
